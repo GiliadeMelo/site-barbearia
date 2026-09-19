@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  
+  <!-- SEO & Meta Tags -->
+  <title>Barbearia Vintage | Cortes Clássicos e Agendamento Online</title>
+  <meta name="description" content="Agende seu horário na Barbearia Vintage. Cortes clássicos, barba na navalha e ambiente premium. Atendimento profissional e pontual." />
+  <meta name="keywords" content="barbearia, corte masculino, barba, agendamento online, barbeiro" />
+  <meta name="author" content="Barbearia Vintage" />
+  <meta name="theme-color" content="#0d0d0d" />
+  
+  <!-- Open Graph / Facebook / WhatsApp Preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Barbearia Vintage | Agende seu Horário" />
+  <meta property="og:description" content="Estilo, tradição e atitude. Agende seu corte ou barba online em poucos cliques." />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=1200&q=80" />
+
+  <!-- Favicon (Substitua pelo seu arquivo .ico ou .png) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💈</text></svg>" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS (CDN para desenvolvimento/produção rápida) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0d0d0d', 'bg-2': '#161616', 'bg-3': '#1e1e1e',
+            gold: '#d4a24c', 'gold-2': '#c9922e', 'gold-soft': '#e6bf7a',
+            text: '#f2f2f2', muted: '#a8a8a8',
+            line: 'rgba(212, 162, 76, 0.25)',
+            whatsapp: '#25D366',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          animation: {
+            'pop-in': 'popIn 0.5s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'spin-slow': 'spin 1s linear infinite',
+          },
+          keyframes: {
+            popIn: {
+              '0%': { transform: 'scale(0)', opacity: '0' },
+              '60%': { transform: 'scale(1.15)', opacity: '1' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google API -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+
+  <style>
+    /* Ajustes finos que o Tailwind não cobre nativamente ou para performance */
+    .glass { background: rgba(13, 13, 13, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.8) sepia(1) saturate(5) hue-rotate(5deg); }
+  and 
+</style>
+</head>
+<body class="bg-bg text-text font-sans antialiased selection:bg-gold selection:text-bg">
+
+  <!-- LOADING OVERLAY -->
+  <div id="loadingOverlay" class="fixed inset-0 z-[9999] bg-bg/90 backdrop-blur-sm hidden flex-col items-center justify-center gap-4 transition-opacity duration-300">
+    <div class="w-12 h-12 border-4 border-line border-t-gold rounded-full animate-spin-slow"></div>
+    <p id="loadingText" class="text-gold font-semibold tracking-wide">Processando...</p>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed top-24 left-1/2 -translate-x-1/2 z-[9998] bg-bg-3 border border-line text-text px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform -translate-y-32 transition-transform duration-300 max-w-[90vw]">
+    <span id="toastIcon" class="text-xl">⚠️</span>
+    <span id="toastMessage" class="text-sm font-medium">Mensagem de erro</span>
+  </div>
+
+  <!-- HEADER -->
+  <header id="header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b border-transparent">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="#home" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center text-bg font-black text-lg group-hover:scale-105 transition-transform">BV</div>
+        <span class="font-serif text-xl font-bold text-text group-hover:text-gold transition-colors">Barbearia <span class="text-gold">Vintage</span></span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-8">
+        <a href="#home" class="nav-link text-sm font-medium hover:text-gold transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-gold after:transition-all hover:after:w-full">Início</a>
+        <a href="#servicos" class="nav-link text-sm font-medium hover:text-gold transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-gold after:transition-all hover:after:w-full">Serviços</a>
+        <a href="#agendar" class="nav-link text-sm font-medium hover:text-gold transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-gold after:transition-all hover:after:w-full">Agendar</a>
+        <a href="#localizacao" class="nav-link text-sm font-medium hover:text-gold transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-gold after:transition-all hover:after:w-full">Localização</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="#" id="navWhatsappBtn" target="_blank" class="hidden sm:inline-flex items-center gap-2 bg-whatsapp text-white px-4 py-2.5 rounded-full text-sm font-semibold hover:bg-green-600 transition-all hover:-translate-y-0.5">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+        <button id="hamburger" class="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 text-text" aria-label="Menu">
+          <span class="w-6 h-0.5 bg-text transition-all duration-300 origin-center"></span>
+          <span class="w-6 h-0.5 bg-text transition-all duration-300"></span>
+          <span class="w-6 h-0.5 bg-text transition-all duration-300 origin-center"></span
+  </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="md:hidden fixed top-20 right-0 w-[80%] max-w-xs h-[calc(100vh-5rem)] bg-bg-2 border-l border-line transform translate-x-full transition-transform duration-300 z-40 flex flex-col p-8 gap-6 shadow-2xl">
+      <a href="#home" class="mobile-link text-lg font-medium hover:text-gold">Início</a>
+      <a href="#servicos" class="mobile-link text-lg font-medium hover:text-gold">Serviços</a>
+      <a href="#agendar" class="mobile-link text-lg font-medium hover:text-gold">Agendar</a>
+      <a href="#localizacao" class="mobile-link text-lg font-medium hover:text-gold">Localização</a>
+      <a href="#" id="mobileWhatsappBtn" target="_blank" class="mt-4 flex items-center justify-center gap-2 bg-whatsapp text-white px-4 py-3 rounded-full font-semibold">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Falar no WhatsApp
+      </a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="home" class="relative min-h-screen flex items-center justify-center pt-20 bg-[url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center bg-no-repeat bg-fixed">
+    <div class="absolute inset-0 bg-gradient-to-b from-bg/90 via-bg/80 to-bg"></div>
+    <div class="relative z-10 container mx-auto px-4 text-center max-w-3xl">
+      <span class="inline-block px-4 py-1.5 border border-line rounded-full text-gold text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase mb-6 animate-pop-in">★ Tradição desde 1998 ★</span>
+      <h1 class="font-serif text-5xl sm:text-6xl md:text-7xl font-black leading-tight mb-6 text-text">
+        Estilo, Tradição e <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-soft">Atitude</span>
+      </h1>
+      <p class="text-muted text-base sm:text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+        Cortes clássicos, barba na navalha e o melhor atendimento da cidade. Viva a experiência de uma barbearia de verdade.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#agendar" class="btn-primary w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-gold to-gold-2 text-bg font-bold rounded-full shadow-lg shadow-gold/20 hover:shadow-gold/40 hover:-translate-y-1 transition-all text-center">
+          Agendar Horário
+        </a>
+        <a href="#servicos" class="btn-outline w-full sm:w-auto px-8 py-4 border-2 border-gold text-gold font-bold rounded-full hover:bg-gold hover:text-bg transition-all text-center">
+          Ver Serviços
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVIÇOS -->
+  <section id="servicos" class="py-20 sm:py-28 bg-bg-2">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-12 sm:mb-16">
+        <span class="text-gold text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase">Nossos Serviços</span>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mt-3 text-text">O que oferecemos</h2>
+        <div class="w-16 h-0.5 bg-gold mx-auto mt-4"></div>
+      </div>
+      <div id="servicesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <!-- Preenchido via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- AGENDAMENTO -->
+  <section id="agendar" class="py-20 sm:py-28 bg-bg relative">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-12 sm:mb-16">
+        <span class="text-gold text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase">Agende agora</span>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mt-3 text-text">Reserve seu horário</h2>
+        <div class="w-16 h-0.5 bg-gold mx-auto mt-4"></div>
+      </div>
+      
+      <div class="max-w-3xl mx-auto bg-bg-3 border border-line rounded-2xl p-6 sm:p-10 shadow-2xl" id="bookingContainer">
+        <!-- Formulário injetado via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCALIZAÇÃO -->
+  <section id="localizacao" class="py-20 sm:py-28 bg-bg-2">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-12 sm:mb-16">
+        <span class="text-gold text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase">Onde estamos</span>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mt-3 text-text">Localização & Horários</h2>
+        <div class="w-16 h-0.5 bg-gold mx-auto mt-4"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+        <!-- Mapa -->
+        <div class="rounded-2xl overflow-hidden border border-line bg-bg-3 min-h-[300px] lg:min-h-[450px]">
+          <iframe id="mapFrame" src="" class="w-full h-full min-h-[300px] lg:min-h-[450px] border-0 grayscale-[0.2] contrast-110" allowfullscreen loading="lazy"></iframe>
+        </div>
+        
+        <!-- Info -->
+        <div class="bg-bg-3 border border-line rounded-2xl p-6 sm:p-10 flex flex-col justify-center">
+          <div class="flex gap-4 mb-8">
+            <div class="w-12 h-12 rounded-xl bg-gold/10 text-gold flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-sans font-semibold text-lg mb-1">Endereço</h3>
+              <p id="locationAddress" class="text-muted text-sm leading-relaxed mb-3">Carregando...</p>
+              <a id="directionsBtn" href="#" target="_blank" class="inline-flex items-center gap-2 text-gold text-sm font-semibold hover:text-gold-soft transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                Como chegar no Maps
+              </a>
+            </div>
+          </div>
+          
+          <div class="flex gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gold/10 text-gold flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-sans font-semibold text-lg mb-3">Horário de Funcionamento</h3>
+              <ul id="locationHours" class="space-y-2 text-sm">
+                <!-- Preenchido via JS -->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="contato" class="bg-[#080808] border-t border-line pt-16 pb-8">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+        <div>
+          <a href="#home" class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold-2 flex items-center justify-center text-bg font-black">BV</div>
+            <span class="font-serif text-xl font-bold text-text">Barbearia <span class="text-gold">Vintage</span></span>
+          </
+  </a>
+          <p class="text-muted text-sm leading-relaxed mb-6">Tradição, estilo e atitude desde 1998. Mais que uma barbearia, uma experiência.</p>
+          <div class="flex gap-3">
+            <a href="#" class="w-10 h-10 rounded-full bg-bg-2 border border-line flex items-center justify-center text-gold hover:bg-gold hover:text-bg transition-all">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="#" class="w-10 h-10 rounded-full bg-bg-2 border border-line flex items-center justify-center text-gold hover:bg-gold hover:text-bg transition-all">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="font-sans font-semibold text-gold uppercase tracking-widest text-sm mb-6">Links Rápidos</h4>
+          <ul class="space-y-3 text-sm">
+            <li><a href="#home" class="text-muted hover:text-gold transition-colors">Início</a></li>
+            <li><a href="#servicos" class="text-muted hover:text-gold transition-colors">Serviços</a></li>
+            <li><a href="#agendar" class="text-muted hover:text-gold transition-colors">Agendar Horário</a></li>
+            <li><a href="#localizacao" class="text-muted hover:text-gold transition-colors">Localização</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-sans font-semibold text-gold uppercase tracking-widest text-sm mb-6">Contato</h4>
+          <ul class="space-y-3 text-sm text-muted">
+            <li id="footerAddress">Carregando endereço...</li>
+            <li><a href="#" id="footerPhoneLink" class="hover:text-gold transition-colors">Carregando telefone...</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-[#1a1a1a] pt-8 text-center">
+        <p class="text-muted text-xs sm:text-sm">© 2026 Barbearia Vintage. Todos os direitos reservados.</p>
+        <a href="#admin" class="inline-block mt-3 text-[10px] sm:text-xs text-[#444] hover:text-gold transition-colors uppercase tracking-wider">Painel Administrativo</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WHATSAPP FLUTUANTE -->
+  <a href="#" id="floatWhatsappBtn" target="_blank" class="fixed bottom-6 right-6 z-40 w-14 h-14 sm:w-16 sm:h-16 bg-whatsapp rounded-full flex items-center justify-center text-white shadow-lg shadow-whatsapp/30 hover:scale-110 transition-transform animate-pulse-slow" aria-label="Fale no WhatsApp">
+    <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <!-- ADMIN OVERLAY -->
+  <div id="adminOverlay" class="fixed inset-0 z-[2000] bg-bg hidden overflow-y-auto">
+    <div class="sticky top-0 bg-bg-2 border-b border-line px-4 py-5 flex items-center justify-between z-10">
+      <h2 class="font-serif text-xl font-bold text-text">🔧 Painel <span class="text-gold">Admin</span></h2>
+      <button id="adminClose" class="w-10 h-10 flex items-center justify-center text-muted hover:text-text hover:bg-bg-3 rounded-lg transition-colors text-2xl">✕</button>
+    </div>
+    <div id="adminContent" class="container mx-auto px-4 py-10"></div>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    /* ============================================================
+       1. CONFIGURAÇÃO CENTRALIZADA
+       ============================================================ */
+    const CONFIG = {
+      // ⚠️ COLE AQUI A URL DO SEU APPS SCRIPT
+      GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbx5dKyQPJ6RA6gzZzogc2jstQbGPMJn0-BNtazG8uJV0uIgi_NJbzeBoNyXXgANwfAkgA/exec', 
+      WHATSAPP_NUMBER: '5511999999999', 
+      WHATSAPP_MSG_FLOAT: 'Olá! Gostaria de agendar um horário na Barbearia Vintage.',
+      ADMIN_PASS: 'barbearia2026',
+      LOCATION: {
+        fullAddress: "Rua Augusta, 1234 - Consolação, São Paulo - SP, 01304-001",
+        embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.1975778582!2d-46.6552!3d-23.5617!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce59c8da0aa315%3A0xd59f9431f2c9776a!2sR.%20Augusta%2C%201234%20-%20Consola%C3%A7%C3%A3o%2C%20S%C3%A3o%20Paulo%20-%20SP%2C%2001304-001!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr",
+        hours: [
+          { days: "Segunda a Sexta", time: "09h — 19h" },
+          { days: "Sábado", time: "09h — 19h" },
+          { days: "Domingo", time: "Fechado" }
+        ]
+      },
+      SERVICES: [
+        { id:'corte-masculino', nome:'Corte masculino', descricao:'Corte tradicional com acabamento na máquina e tesoura, finalizado com produtos premium.', duracao:40, preco:50, categoria:'corte', icone:'<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12" stroke-width="1.5"/></svg>' },
+        { id:'barba-completa', nome:'Barba (aparar e desenhar)', descricao:'Barba alinhada na navalha, com toalha quente, óleos e finalização impecável.', duracao:30, preco:35, categoria:'barba', icone:'<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 3v18M18 3v18M6 12h12M9 7h6M9 17h6" stroke-width="1.5"/></svg>' },
+        { id:'combo-corte-barba', nome:'Combo corte + barba', descricao:'O pacote completo: corte impecável + barba na navalha. O mais pedido da casa.', duracao:60, preco:75, categoria:'combo', icone:'<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9" stroke-width="1.5"/></svg>' },
+        { id:'pigmentacao-barba', nome:'Pigmentação de barba', descricao:'Disfarce de falhas e realce do volume com técnica de micropigmentação.', duracao:45, preco:60, categoria:'tratamento', icone:'<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" stroke-width="1.5"/></svg>' }
+      ],
+      BARBERS: [
+        { id:'carlos', nome:'Carlos', cor:'bg-gold' },
+        { id:'rafael', nome:'Rafael', cor:'bg-gold-2' },
+        { id:'diego', nome:'Diego', cor:'bg-gold-soft' }
+      ]
+    };
+
+    let bookingState = { serviceId:'', barberId:'', date:'', time:'', startMin:0, endMin:0, clientName:'', clientPhone:'' };
+    let occupiedSlots = [];
+
+    /* ============================================================
+       2. UTILITÁRIOS & UI (Toast, Loading)
+       ============================================================ */
+    const fmt = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    const fmtDate = d => { const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; };
+    const getInitials = name => name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+    function showLoading(show, text = 'Processando...') {
+      const el = document.getElementById('loadingOverlay');
+      document.getElementById('loadingText').textContent = text;
+      el.classList.toggle('hidden', !show);
+      el.classList.toggle('flex', show);
+    }
+
+    function showToast(message, type = 'error') {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      const msg = document.getElementById('toastMessage');
+      
+      msg.textContent = message;
+      icon.textContent = type === 'error' ? '⚠️' : '✅';
+      toast.classList.remove('border-red-500', 'border-green-500');
+      toast.classList.add(type === 'error' ? 'border-red-500/50' : 'border-green-500/50');
+      
+      toast.classList.remove('-translate-y-32');
+      toast.classList.add('translate-y-0');
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0');
+        toast.classList.add('-translate-y-32');
+      }, 4000);
+    }
+
+    /* ============================================================
+       3. GOOGLE SHEETS API
+       ============================================================ */
+    async function fetchOccupiedSlots(date, barber) {
+      try {
+        const url = `${CONFIG.GOOGLE_SCRIPT_URL}?date=${date}&barber=${barber}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.success) { occupiedSlots = data.occupied; return true; }
+        return false;
+      } catch (error) { return false; }
+    }
+
+    async function saveBookingToSheet(payload) {
+      try {
+        const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'create', ...payload })
+        });
+        return await response.json();
+      } catch (error) { return { success: false, message: "Erro de conexão com a agenda." }; }
+    }
+
+    async function getAppointmentsFromSheet() {
+      try {
+        const response = await fetch(`${CONFIG.GOOGLE_SCRIPT_URL}?action=getAll`);
+        const data = await response.json();
+        return data.success ? data.data : [];
+      } catch (error) { return []; }
+    }
+
+    async function updateAppointmentInSheet(id, status) {
+      try {
+        const response = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'update', id, status })
+        });
+        return await response.json();
+      } catch (error) { return { success: false }; }
+    }
+
+    /* ============================================================
+       4. LÓGICA DE AGENDAMENTO
+       ============================================================ */
+    function generateTimeSlots(dateStr, serviceId, barberId) {
+      const service = CONFIG.SERVICES.find(s => s.id === serviceId);
+      if (!service) return [];
+      if (new Date(dateStr + 'T12:00:00').getDay() === 0) return []; // Domingo fechado
+
+      const dur = service.duracao; const slots = [];
+      for (let h = 9; h < 19; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          const startMin = h * 60 + m; const endMin = startMin + dur;
+          if (endMin > 19 * 60) continue;
+          
+          const startStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+          let isOccupied = false;
+          
+          // Verifica se já passou (se for hoje)
+          const today = new Date().toISOString().split('T')[0];
+          if (dateStr === today) {
+            const now = new Date();
+            if (startMin <= now.getHours()*60 + now.getMinutes()) isOccupied = true;
+          }
+
+          // Verifica colisão com planilha
+          if (!isOccupied) {
+            for (let occ of occupiedSlots) {
+              const occStart = timeToMinutes(occ.time);
+              const occEnd = occStart + parseInt(occ.duration);
+              if (startMin < occEnd && endMin > occStart) { isOccupied = true; break; }
+            }
+          }
+          slots.push({ time: startStr, occupied: isOccupied, startMin, endMin });
+        }
+      }
+      return slots;
+    }
+
+    function timeToMinutes(timeStr) {
+      const [h, m] = timeStr.split(':').map(Number);
+      return (h * 60) + m;
+    }
+
+    /* ============================================================
+       5. RENDERIZAÇÃO
+       ============================================================ */
+    function renderServices() {
+      document.getElementById('servicesGrid').innerHTML = CONFIG.SERVICES.map(s => `
+        <article class="bg-bg-2 border border-transparent hover:border-line rounded-2xl p-6 sm:p-8 transition-all duration-300 hover:-translate-y-2 group flex flex-col h-full">
+          <div class="w-16 h-16 rounded-full bg-gold/10 text-gold flex items-center justify-center mb-6 group-hover:bg-gold group-hover:text-bg transition-colors duration-300">
+            ${s.icone}
+          </div>
+          <span class="absolute top-6 right-6 text-[10px] font-bold tracking-widest uppercase text-gold bg-gold/10 px-3 py-1 rounded-full">${s.categoria}</span>
+          <h3 class="font-serif text-xl font-bold mb-3 text-text">${s.nome}</h3>
+          <p class="text-muted text-sm leading-relaxed mb-6 flex-grow">${s.descricao}</p>
+          <div class="flex items-center justify-between pt-4 border-t border-dashed border-[#2a2a2a] mb-6">
+            <span class="flex items-center gap-2 text-muted text-sm">
+              <svg class="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 6v6l4 2" stroke-width="2"/></svg>
+              ${s.duracao} min
+            </span>
+            <span class="font-serif text-2xl font-bold text-gold">${fmt(s.preco)}</span>
+          </div>
+          <a href="#agendar?servico=${s.id}" class="mt-auto w-full py-3 border border-gold text-gold font-semibold rounded-full text-center hover:bg-gold hover:text-bg transition-all text-sm uppercase tracking-wider">
+            Agendar este
+          </a>
+        </article>
+      `).join('');
+    }
+
+    function renderBookingForm(preselectedServiceId) {
+      const c = document.getElementById('bookingContainer');
+      c.innerHTML = `
+        <form id="bookingForm" autocomplete="off" class="space-y-6">
+          <div>
+            <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">1. Escolha o serviço</label>
+            <select id="fServico" required class="w-full bg-bg border border-[#2a2a2a] text-text px-4 py-3.5 rounded-xl focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all appearance-none">
+              <option value="">Selecione um serviço</option>
+              ${CONFIG.SERVICES.map(s => `<option value="${s.id}">${s.nome} — ${s.duracao}min — ${fmt(s.preco)}</option>`).join('')}
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-3">2. Escolha o barbeiro</label>
+            <div class="grid grid-cols-3 gap-3" id="barberGrid">
+              ${CONFIG.BARBERS.map(b => `
+                <div class="barber-card bg-bg border-2 border-[#2a2a2a] rounded-xl p-4 text-center cursor-pointer hover:border-line transition-all" data-barber="${b.id}">
+                  <div class="w-12 h-12 ${b.cor} rounded-full mx-auto mb-2 flex items-center justify-center font-serif font-bold text-bg text-lg">${getInitials(b.nome)}</div>
+                  <h4 class="font-semibold text-sm text-text">${b.nome}</h4>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">3. Data</label>
+              <input type="date" id="fData" required min="${new Date().toISOString().split('T')[0]}" class="w-full bg-bg border border-[#2a2a2a] text-text px-4 py-3.5 rounded-xl focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all" />
+            </div>
+          </div>
+
+          <div id="timeGroup" class="hidden">
+            <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-3">4. Horário disponível</label>
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2" id="timeGrid">
+              <p class="col-span-full text-center text-muted py-4 text-sm">Carregando horários...</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#2a2a2a]">
+            <div>
+              <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">Seu nome</label>
+              <input type="text" id="fNome" required placeholder="Nome completo" class="w-full bg-bg border border-[#2a2a2a] text-text px-4 py-3.5 rounded-xl focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">WhatsApp</label>
+              <input type="tel" id="fTelefone" required placeholder="(11) 99999-9999" class="w-full bg-bg border border-[#2a2a2a] text-text px-4 py-3.5 rounded-xl focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all" />
+            </div>
+          </div>
+
+          <button type="submit" id="btnSubmit" disabled class="w-full py-4 bg-gradient-to-r from-gold to-gold-2 text-bg font-bold rounded-xl shadow-lg shadow-gold/20 hover:shadow-gold/40 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 text-sm uppercase tracking-wider">
+            Confirmar Agendamento
+          </button>
+        </form>
+      `;
+
+      bookingState = { serviceId:'', barberId:'', date:'', time:'', startMin:0, endMin:0, clientName:'', clientPhone:'' };
+
+      if (preselectedServiceId && CONFIG.SERVICES.find(s=>s.id===preselectedServiceId)) {
+        document.getElementById('fServico').value = preselectedServiceId;
+        bookingState.serviceId = preselectedServiceId;
+      }
+
+      bindFormEvents();
+    }
+
+    function bindFormEvents() {
+      document.getElementById('fServico').addEventListener('change', e => { 
+        bookingState.serviceId = e.target.value; bookingState.time = ''; 
+        renderTimeSlotsIfNeeded(); validateForm(); 
+      });
+      
+      document.querySelectorAll('.barber-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.barber-card').forEach(c=>c.classList.remove('border-gold', 'bg-gold/5'));
+          card.classList.add('border-gold', 'bg-gold/5');
+          bookingState.barberId = card.dataset.barber; bookingState.time = '';
+          renderTimeSlotsIfNeeded(); validateForm();
+        });
+      });
+
+      document.getElementById('fData').addEventListener('change', async (e) => { 
+        bookingState.date = e.target.value; bookingState.time = ''; 
+        await renderTimeSlotsIfNeeded(); validateForm(); 
+      });
+
+      document.getElementById('bookingForm').addEventListener('submit', handleBookingSubmit);
+      
+      ['fNome', 'fTelefone'].forEach(id => {
+        document.getElementById(id).addEventListener('input', validateForm);
+      });
+    }
+
+    async function renderTimeSlotsIfNeeded() {
+      const { serviceId, barberId, date } = bookingState;
+      const group = document.getElementById('timeGroup');
+      const grid = document.getElementById('timeGrid');
+
+      if (!serviceId || !barberId || !date) { group.classList.add('hidden'); return; }
+      
+      group.classList.remove('hidden');
+      grid.innerHTML = '<p class="col-span-full text-center text-muted py-4 text-sm flex items-center justify-center gap-2"><span class="w-4 h-4 border-2 border-muted border-t-gold rounded-full animate-spin-slow"></span> Verificando agenda...</p>';
+      
+      const success = await fetchOccupiedSlots(date, barberId);
+      if (!success) {
+        grid.innerHTML = '<p class="col-span-full text-center text-red-400 py-4 text-sm">Erro ao carregar agenda. Verifique sua internet.</p>';
+        return;
+      }
+
+      const slots = generateTimeSlots(date, serviceId, barberId);
+      if (slots.length === 0) { 
+        grid.innerHTML = '<p class="col-span-full text-center text-muted py-4 text-sm">Nenhum horário disponível para esta data.</p>'; 
+        return; 
+      }
+
+      grid.innerHTML = slots.map(s => `
+        <button type="button" class="time-slot py-2.5 px-1 rounded-lg text-sm font-semibold border border-[#2a2a2a] bg-bg text-text transition-all ${s.occupied ? 'opacity-40 cursor-not-allowed line-through border-transparent bg-red-500/10 text-red-400' : 'hover:border-gold hover:bg-gold/10'} ${bookingState.time===s.time ? '!border-gold !bg-gold !text-bg' : ''}" 
+          data-time="${s.time}" data-start="${s.startMin}" data-end="${s.endMin}" ${s.occupied ? 'disabled' : ''}>
+          ${s.time}
+        </button>
+      `).join('');
+      
+      grid.querySelectorAll('.time-slot:not(:disabled)').forEach(btn => {
+        btn.addEventListener('click', () => {
+          grid.querySelectorAll('.time-slot').forEach(b=>b.classList.remove('!border-gold', '!bg-gold', '!text-bg'));
+          btn.classList.add('!border-gold', '!bg-gold', '!text-bg');
+          bookingState.time = btn.dataset.time;
+          bookingState.startMin = parseInt(btn.dataset.start); 
+          bookingState.endMin = parseInt(btn.dataset.end);
+          validateForm();
+        });
+      });
+    }
+
+    function validateForm() {
+      const btn = document.getElementById('btnSubmit');
+      const nameOk = document.getElementById('fNome').value.trim().length >= 3;
+      const phoneOk = document.getElementById('fTelefone').value.trim().length >= 10;
+      btn.disabled = !(bookingState.serviceId && bookingState.barberId && bookingState.date && bookingState.time && nameOk && phoneOk);
+    }
+
+    /* ============================================================
+       6. SUBMIT & FLUXO COMPLETO
+       ============================================================ */
+    async function handleBookingSubmit(e) {
+      e.preventDefault();
+      showLoading(true, 'Registrando seu agendamento...');
+
+      const service = CONFIG.SERVICES.find(s=>s.id===bookingState.serviceId);
+      const barber = CONFIG.BARBERS.find(b=>b.id===bookingState.barberId);
+
+      const payload = {
+        date: bookingState.date,
+        time: bookingState.time,
+        duration: service.duracao,
+        service: service.nome,
+        barber: barber.nome,
+        client: document.getElementById('fNome').value.trim(),
+        phone: document.getElementById('fTelefone').value.trim()
+      };
+
+      const result = await saveBookingToSheet(payload);
+
+      if (result.success) {
+        showLoading(false);
+        renderConfirmation({ ...payload, id: result.id, startTime: payload.time, endTime: `${String(Math.floor(bookingState.endMin/60)).padStart(2,'0')}:${String(bookingState.endMin%60).padStart(2,'0')}` }, service, barber);
+        showToast('Agendamento realizado com sucesso!', 'success');
+      } else {
+        showLoading(false);
+        showToast(result.message || 'Este horário acabou de ser reservado. Por favor, escolha outro.', 'error');
+        await renderTimeSlotsIfNeeded(); // Atualiza slots em caso de conflito
+      }
+    }
+
+    function renderConfirmation(apt, service, barber) {
+      const waMsg = `Olá! Gostaria de confirmar meu agendamento:\n\n` +
+        `✂️ *Serviço:* ${service.nome}\n` +
+        `💈 *Barbeiro:* ${barber.nome}\n` +
+        `📅 *Data:* ${fmtDate(apt.date)}\n` +
+        `⏰ *Horário:* ${apt.startTime} às ${apt.endTime}\n` +
+        `⏱️ *Duração:* ${service.duracao} min\n` +
+        `💰 *Valor:* ${fmt(service.preco)}\n` +
+        `👤 *Nome:* ${apt.client}\n` +
+        `📱 *Telefone:* ${apt.phone}\n` +
+        `🔖 *Código:* ${apt.id}\n\n` +
+        `Aguardo a confirmação. Obrigado!`;
+      
+      const waLink = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`;
+
+      document.getElementById('bookingContainer').innerHTML = `
+        <div class="text-center py-4 animate-pop-in">
+          <div class="w-20 h-20 rounded-full bg-green-500/15 text-green-500 flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <h3 class="font-serif text-2xl sm:text-3xl font-bold mb-2 text-text">Agendamento Confirmado!</h3>
+          <p class="text-muted text-sm sm:text-base mb-8 max-w-md mx-auto">Seus dados foram salvos em nossa agenda. Para garantir seu horário, envie a confirmação abaixo pelo WhatsApp.</p>
+          
+          <div class="bg-bg border border-[#2a2a2a] rounded-xl p-6 text-left mb-8 max-w-md mx-auto space-y-3">
+            <div class="flex justify-between text-sm"><span class="text-muted">Serviço</span><span class="font-semibold text-gold">${service.nome}</span></div>
+            <div class="flex justify-between text-sm"><span class="text-muted">Barbeiro</span><span class="font-semibold text-text">${barber.nome}</span></div>
+            <div class="flex justify-between text-sm"><span class="text-muted">Data e Hora</span><span class="font-semibold text-text">${fmtDate(apt.date)} às ${apt.startTime}</span></div>
+            <div class="flex justify-between text-sm"><span class="text-muted">Cliente</span><span class="font-semibold text-text">${apt.client}</span></div>
+            <div class="pt-3 border-t border-dashed border-[#2a2a2a] flex justify-between text-sm"><span class="text-muted">Código</span><span class="font-mono text-xs text-muted">${apt.id}</span></div>
+          </div>
+
+          <div class="flex flex-col gap-3 max-w-md mx-auto">
+            <a href="${waLink}" target="_blank" class="w-full py-4 bg-whatsapp text-white font-bold rounded-xl shadow-lg shadow-whatsapp/20 hover:bg-green-600 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Enviar Confirmação no WhatsApp
+            </a>
+            <button onclick="renderBookingForm()" class="w-full py-3 border border-line text-muted font-semibold rounded-xl hover:bg-bg-2 hover:text-text transition-all text-sm">
+              Fazer novo agendamento
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ============================================================
+       7. LOCALIZAÇÃO & ADMIN
+       ============================================================ */
+    function renderLocation() {
+      const loc = CONFIG.LOCATION;
+      document.getElementById('mapFrame').src = loc.embedUrl;
+      document.getElementById('locationAddress').innerHTML = loc.fullAddress.replace(/,/g, '<br/>');
+      document.getElementById('footerAddress').textContent = loc.fullAddress;
+      document.getElementById('directionsBtn').href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(loc.fullAddress)}`;
+      
+      const hoursList = document.getElementById('locationHours');
+      hoursList.innerHTML = loc.hours.map(h => `
+        <li class="flex justify-between py-2 border-b border-dashed border-[#2a2a2a] last:border-0">
+          <span class="text-muted">${h.days}</span>
+          <span class="font-semibold text-gold">${h.time}</span>
+        </li>
+      `).join('');
+    }
+
+    function initAdmin() {
+      const overlay = document.getElementById('adminOverlay');
+      const content = document.getElementById('adminContent');
+
+      function showAdmin() {
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        if (sessionStorage.getItem('adminAuth') === 'true') renderAdminDashboard();
+        else renderAdminLogin();
+      }
+      function hideAdmin() { 
+        overlay.classList.add('hidden'); 
+        document.body.style.overflow = ''; 
+        window.location.hash = ''; 
+      }
+      document.getElementById('adminClose').addEventListener('click', hideAdmin);
+
+      function renderAdminLogin() {
+        content.innerHTML = `
+          <div class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+            <h3 class="font-serif text-2xl font-bold mb-2">Acesso Restrito</h3>
+            <p class="text-muted text-sm mb-6">Digite a senha do painel administrativo.</p>
+            <form id="adminLoginForm" class="w-full max-w-xs">
+              <input type="password" id="adminPassInput" placeholder="Senha" autofocus class="w-full bg-bg-2 border border-[#2a2a2a] text-text px-4 py-3 rounded-xl mb-3 text-center focus:border-gold outline-none" />
+              <p id="adminError" class="text-red-400 text-xs mb-4 hidden">Senha incorreta.</p>
+              <button type="submit" class="w-full py-3 bg-gradient-to-r from-gold to-gold-2 text-bg font-bold rounded-xl">Entrar</button>
+            </form>
+          </div>
+        `;
+        document.getElementById('adminLoginForm').addEventListener('submit', e => {
+          e.preventDefault();
+          if (document.getElementById('adminPassInput').value === CONFIG.ADMIN_PASS) {
+            sessionStorage.setItem('adminAuth','true'); renderAdminDashboard();
+          } else { document.getElementById('adminError').classList.remove('hidden'); }
+        });
+      }
+
+      async function renderAdminDashboard() {
+        showLoading(true, 'Carregando dados da planilha...');
+        const all = await getAppointmentsFromSheet();
+        showLoading(false);
+        
+        const today = new Date().toISOString().split('T')[0];
+        const confirmed = all.filter(a=>a.status==='Confirmado');
+        const todayApts = confirmed.filter(a=>a.date===today);
+        const completed = all.filter(a=>a.status==='Concluído');
+
+        content.innerHTML = `
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-bg-2 border border-line rounded-xl p-5 text-center"><div class="font-serif text-3xl font-bold text-gold">${all.length}</div><div class="text-xs text-muted uppercase tracking-wider mt-1">Total</div></div>
+            <div class="bg-bg-2 border border-line rounded-xl p-5 text-center"><div class="font-serif text-3xl font-bold text-gold">${todayApts.length}</div><div class="text-xs text-muted uppercase tracking-wider mt-1">Hoje</div></div>
+            <div class="bg-bg-2 border border-line rounded-xl p-5 text-center"><div class="font-serif text-3xl font-bold text-gold">${confirmed.length}</div><div class="text-xs text-muted uppercase tracking-wider mt-1">Confirmados</div></div>
+            <div class="bg-bg-2 border border-line rounded-xl p-5 text-center"><div class="font-serif text-3xl font-bold text-gold">${completed.length}</div><div class="text-xs text-muted uppercase tracking-wider mt-1">Concluídos</div></div>
+          </div>
+          
+          <div class="flex flex-wrap gap-3 mb-6">
+            <select id="filterStatus" class="bg-bg-2 border border-[#2a2a2a] text-text px-3 py-2 rounded-lg text-sm outline-none focus:border-gold">
+              <option value="all">Todos os status</option>
+              <option value="Confirmado">Confirmados</option>
+              <option value="Concluído">Concluídos</option>
+              <option value="Cancelado">Cancelados</option>
+            </select>
+            <input type="date" id="filterDate" class="bg-bg-2 border border-[#2a2a2a] text-text px-3 py-2 rounded-lg text-sm outline-none focus:border-gold" />
+            <button onclick="document.getElementById('filterStatus').value='all';document.getElementById('filterDate').value='';renderAdminTable()" class="px-4 py-2 border border-line text-muted rounded-lg text-sm hover:text-text hover:bg-bg-2 transition-colors">Limpar</button>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-line">
+            <table class="w-full min-w-[700px] text-left text-sm">
+              <thead class="bg-bg-2 text-gold text-xs uppercase tracking-wider">
+                <tr><th class="p-4">Cliente</th><th class="p-4">Serviço</th><th class="p-4">Barbeiro</th><th class="p-4">Data</th><th class="p-4">Horário</th><th class="p-4">Status</th><th class="p-4">Ações</th></tr>
+              </thead>
+              <tbody id="adminTableBody" class="divide-y divide-[#1a1a1a]"></tbody>
+            </table>
+          </div>
+          <div id="adminEmpty" class="hidden text-center py-12 text-muted">Nenhum agendamento encontrado.</div>
+        `;
+        document.getElementById('filterStatus').addEventListener('change', () => renderAdminTable(all));
+        document.getElementById('filterDate').addEventListener('change', () => renderAdminTable(all));
+        renderAdminTable(all);
+      }
+
+      window.renderAdminTable = function(allBookings) {
+        const statusF = document.getElementById('filterStatus')?.value || 'all';
+        const dateF = document.getElementById('filterDate')?.value || '';
+        let list = allBookings || [];
+        
+        if (statusF !== 'all') list = list.filter(a=>a.status===statusF);
+        if (dateF) list = list.filter(a=>a.date===dateF);
+        list.sort((a,b) => (b.date+b.time).localeCompare(a.date+a.time));
+
+        const tbody = document.getElementById('adminTableBody');
+        const empty = document.getElementById('adminEmpty');
+        if (!tbody) return;
+
+        if (list.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+        empty.classList.add('hidden');
+
+        tbody.innerHTML = list.map(a => {
+          const statusColor = a.status === 'Confirmado' ? 'text-blue-400 bg-blue-400/10' : a.status === 'Concluído' ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10';
+          return `
+          <tr class="hover:bg-bg-3/50 transition-colors">
+            <td class="p-4"><div class="font-semibold text-text">${a.client}</div><div class="text-xs text-muted">${a.phone}</div></td>
+            <td class="p-4 text-text">${a.service}</td>
+            <td class="p-4 text-text">${a.barber}</td>
+            <td class="p-4 text-text">${fmtDate(a.date)}</td>
+            <td class="p-4 text-text font-mono text-xs">${a.time}</td>
+            <td class="p-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusColor}">${a.status}</span></td>
+            <td class="p-4">
+              <div class="flex gap-2 flex-wrap">
+                ${a.status==='Confirmado'?`
+                  <button onclick="adminAction('${a.id}','Concluído')" class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 transition-colors">✓</button>
+                  <button onclick="adminAction('${a.id}','Cancelado')" class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-700 transition-colors">✕</button>
+                `:`<button onclick="adminAction('${a.id}','Confirmado')" class="px-3 py-1.5 border border-line text-muted rounded-lg text-xs hover:text-text hover:bg-bg-2 transition-colors">Reativar</button>`}
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+      };
+
+      window.adminAction = async function(id, newStatus) {
+        showLoading(true, 'Atualizando...');
+        await updateAppointmentInSheet(id, newStatus);
+        showLoading(false);
+        renderAdminDashboard();
+      };
+
+      window.addEventListener('hashchange', () => { if (window.location.hash === '#admin') showAdmin(); });
+      if (window.location.hash === '#admin') showAdmin();
+    }
+
+    /* ============================================================
+       8. INICIALIZAÇÃO & EVENTOS GLOBAIS
+       ============================================================ */
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('header');
+      header.classList.toggle('glass', window.scrollY > 50);
+      header.classList.toggle('border-line', window.scrollY > 50);
+    });
+
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      const isOpen = !mobileMenu.classList.contains('translate-x-full');
+      mobileMenu.classList.toggle('translate-x-full', isOpen);
+      hamburger.children[0].classList.toggle('rotate-45', !isOpen);
+      hamburger.children[0].classList.toggle('translate-y-2', !isOpen);
+      hamburger.children[1].classList.toggle('opacity-0', !isOpen);
+      hamburger.children[2].classList.toggle('-rotate-45', !isOpen);
+      hamburger.children[2].classList.toggle('-translate-y-2', !isOpen);
+    });
+
+    document.querySelectorAll('.mobile-link').forEach(l => l.addEventListener('click', () => {
+      mobileMenu.classList.add('translate-x-full');
+      // Reset hamburger icon
+      hamburger.children[0].classList.remove('rotate-45', 'translate-y-2');
+      hamburger.children[1].classList.remove('opacity-0');
+      hamburger.children[2].classList.remove('-rotate-45', '-translate-y-2');
+    }));
+
+    function initWhatsAppLinks() {
+      const encodedMsg = encodeURIComponent(CONFIG.WHATSAPP_MSG_FLOAT);
+      const waUrl = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodedMsg}`;
+      document.getElementById('floatWhatsappBtn').href = waUrl;
+      document.getElementById('navWhatsappBtn').href = waUrl;
+      document.getElementById('mobileWhatsappBtn').href = waUrl;
+      
+      const raw = CONFIG.WHATSAPP_NUMBER;
+      if (raw.length >= 13) {
+        const formatted = `(${raw.slice(2,4)}) ${raw.slice(4,9)}-${raw.slice(9)}`;
+        document.getElementById('footerPhoneLink').textContent = formatted;
+        document.getElementById('footerPhoneLink').href = waUrl;
+      }
+    }
+
+    window.addEventListener('load', () => {
+      const p = new URLSearchParams(window.location.search);
+      initWhatsAppLinks();
+      renderLocation();
+      renderServices();
+      renderBookingForm(p.get('servico') || '');
+      initAdmin();
+    });
+  </script>
+</body>
+</html>
